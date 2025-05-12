@@ -8,13 +8,13 @@ export const useField = (type) => {
   }
 
   const onReset = () => {
-	setValue('')
+    setValue('')
   }
 
   return {
     type,
     value,
     onChange,
-	onReset
+    onReset
   }
 }

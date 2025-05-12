@@ -4,6 +4,7 @@ import {
   Routes, Route, Link, useParams, useNavigate
 } from 'react-router-dom'
 import  { useField } from './hooks'
+import PropTypes from 'prop-types';
 
 const Menu = () => {
   const padding = {
@@ -40,7 +41,7 @@ const About = () => (
     <em>An anecdote is a brief, revealing account of an individual person or an incident.
       Occasionally humorous, anecdotes differ from jokes because their primary purpose is not simply to provoke laughter but to reveal a truth more general than the brief tale itself,
       such as to characterize a person by delineating a specific quirk or trait, to communicate an abstract idea about a person, place, or thing through the concrete details of a short narrative.
-      An anecdote is "a story with a point."</em>
+      An anecdote is &quot;a story with a point.&quot;</em>
 
     <p>Software engineering is full of excellent anecdotes, at this app you can find the best and add more.</p>
   </div>
@@ -50,7 +51,6 @@ const About = () => (
 const AnecdoteById = ({ anecdotes }) => {
   const id = useParams().id
   const anecdote = anecdotes.find(n => n.id === Number(id))
-  // const anecdoteById = anecdotes.find(a => a.id === anecdote)
 
   return (
     <div>
@@ -59,7 +59,7 @@ const AnecdoteById = ({ anecdotes }) => {
         has {anecdote.votes} votes
       </p>
       <p>
-        for more info see <a href='${anecdote.info}'>{anecdote.info}</a>
+        for more info see <a href={anecdote.info}>{anecdote.info}</a>
       </p>
     </div>
   )
@@ -75,13 +75,10 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
-  // const [content, setContent] = useState('')
-  // const [author, setAuthor] = useState('')
-  // const [info, setInfo] = useState('')
-  const navigate = useNavigate()
   const content = useField('content')
   const author = useField('author')
   const info = useField('info')
+  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -158,20 +155,6 @@ const App = () => {
     notify(`a new anecdote '${anecdote.content}'`)
   }
 
-  const anecdoteById = (id) =>
-    anecdotes.find(a => a.id === id)
-
-  const vote = (id) => {
-    const anecdote = anecdoteById(id)
-
-    const voted = {
-      ...anecdote,
-      votes: anecdote.votes + 1
-    }
-
-    setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
-  }
-
   return (
     <Router>
       <div>
@@ -190,6 +173,30 @@ const App = () => {
       </div>
     </Router>
   )
+}
+
+AnecdoteList.propTypes = {
+  anecdotes: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      content: PropTypes.string.isRequired,
+      author: PropTypes.string.isRequired,
+      info: PropTypes.string.isRequired,
+      votes: PropTypes.number.isRequired,
+    })
+  ).isRequired
+}
+CreateNew.propTypes = {
+  addNew: PropTypes.func.isRequired
+}
+
+AnecdoteById.propTypes = {
+  anecdotes: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      content: PropTypes.string.isRequired
+    })
+  ).isRequired
 }
 
 export default App
