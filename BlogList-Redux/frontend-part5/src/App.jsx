@@ -10,39 +10,56 @@ import { notifyUser } from './utils/notifications'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [notification, setNotification] = useState({ message: null, success: true })
+  const [notification, setNotification] = useState({
+    message: null,
+    success: true,
+  })
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
 
-  useEffect(() => {
-    blogService
-      .getAll()
-      .then(blogs =>
-        setBlogs( blogs )
-      )
-  }, [])
+  const isTokenExpired = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const now = Date.now() / 1000 // current time in seconds
+      return payload.exp < now
+    } catch (error) {
+      console.error('Failed to decode token', error)
+      return true // Treat as expired if something goes wrong
+    }
+  }
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+      const expired = isTokenExpired(user.token)
+
+      if (expired) {
+        window.localStorage.removeItem('loggedBlogappUser')
+        setUser(null)
+      } else {
+        setUser(user)
+        blogService.setToken(user.token)
+      }
     }
+  }, [])
+
+  useEffect(() => {
+    blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
   const addBlog = (newBlog) => {
     blogFormRef.current.toggleVisibility()
-    if (newBlog.author !== user.name){
+    if (newBlog.author !== user.name) {
       notifyUser(
         setNotification,
         'You can only add blogs with your own name',
-        false)
-    }
-    else{
+        false
+      )
+    } else {
       blogService
         .createBlog(newBlog)
-        .then(returnedBlog => {
+        .then((returnedBlog) => {
           setBlogs(blogs.concat(returnedBlog))
           notifyUser(
             setNotification,
@@ -50,13 +67,9 @@ const App = () => {
             true
           )
         })
-        .catch(error => {
+        .catch((error) => {
           const errorMessage = error.response.data.error
-          notifyUser(
-            setNotification,
-            errorMessage,
-            false
-          )
+          notifyUser(setNotification, errorMessage, false)
         })
     }
   }
@@ -64,58 +77,59 @@ const App = () => {
   const handleLike = async (blog) => {
     const updatedBlog = {
       ...blog,
-      likes: blog.likes + 1
+      likes: blog.likes + 1,
     }
     const returnedBlog = await blogService.updateBlog(blog.id, updatedBlog)
-    setBlogs(blogs.map(b => b.id === blog.id ? returnedBlog : b))
+    setBlogs(blogs.map((b) => (b.id === blog.id ? returnedBlog : b)))
   }
 
   const handleRemove = (blog) => {
     const title = blog.title
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      blogService
-        .deleteBlog(blog.id)
-        .then(() => {
-          setBlogs(blogs.filter(b => b.id !== blog.id))
-          notifyUser(
-            setNotification,
-            `blog ${title} removed`,
-            true
-          )
-        })
+      blogService.deleteBlog(blog.id).then(() => {
+        setBlogs(blogs.filter((b) => b.id !== blog.id))
+        notifyUser(setNotification, `blog ${title} removed`, true)
+      })
     }
   }
 
   const createBlog = () => (
-    <Togglable buttonLabel='new blog' ref={blogFormRef}>
+    <Togglable buttonLabel="new blog" ref={blogFormRef}>
       <CreateNewBlog addBlog={addBlog} />
     </Togglable>
   )
 
-  if (user === null){
+  if (user === null) {
     return (
       <div>
-        <Notification message={notification.message} success={notification?.success} />
-        <LogInForm  setUser={setUser} setNotification={setNotification} />
+        <Notification
+          message={notification.message}
+          success={notification?.success}
+        />
+        <LogInForm setUser={setUser} setNotification={setNotification} />
       </div>
     )
-  }
-  else if(user){
-    return(
+  } else if (user) {
+    return (
       <div>
         <h2>blogs</h2>
-        <Notification message={notification.message} success={notification?.success} />
+        <Notification
+          message={notification.message}
+          success={notification?.success}
+        />
         <LogOutForm user={user} setUser={setUser} />
         {createBlog()}
         {blogs
           .sort((a, b) => b.likes - a.likes)
-          .map(blog =>
-            <Blog key={blog.id}
+          .map((blog) => (
+            <Blog
+              key={blog.id}
               blog={blog}
               userLoggedIn={user.name}
               handleLike={handleLike}
-              handleRemove={handleRemove} />
-          )}
+              handleRemove={handleRemove}
+            />
+          ))}
       </div>
     )
   }

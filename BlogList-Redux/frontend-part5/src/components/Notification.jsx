@@ -1,4 +1,7 @@
+// import { useDispatch } from 'react-redux'
+
 const Notification = ({ message, success }) => {
+  // const dispatch = useDispatch()
   if (message === null) {
     return null
   }
@@ -14,7 +17,7 @@ const Notification = ({ message, success }) => {
   }
 
   return (
-    <div className='notification' style={notificationStyle}>
+    <div className="notification" style={notificationStyle}>
       {message}
     </div>
   )
