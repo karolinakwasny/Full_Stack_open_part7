@@ -23,7 +23,7 @@ const CreateNewBlog = ({ addBlog }) => {
       <h2>create new</h2>
       <form onSubmit={handleAddBlog}>
         <div>
-        title:
+          title:
           <input
             type="text"
             value={title}
@@ -33,7 +33,7 @@ const CreateNewBlog = ({ addBlog }) => {
           />
         </div>
         <div>
-        author:
+          author:
           <input
             type="text"
             value={author}
@@ -43,7 +43,7 @@ const CreateNewBlog = ({ addBlog }) => {
           />
         </div>
         <div>
-        url:
+          url:
           <input
             type="text"
             value={url}
@@ -59,4 +59,3 @@ const CreateNewBlog = ({ addBlog }) => {
 }
 
 export default CreateNewBlog
-

@@ -1,7 +1,11 @@
-// import { useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
-const Notification = ({ message, success }) => {
-  // const dispatch = useDispatch()
+const Notification = () => {
+  const message = useSelector((state) => state.notification.message)
+  const success = useSelector((state) => state.notification.success)
+
+  console.log('message in component', message)
+  console.log('success status in component', success)
   if (message === null) {
     return null
   }

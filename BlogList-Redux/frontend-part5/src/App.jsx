@@ -6,16 +6,14 @@ import CreateNewBlog from './components/CreateBlog'
 import LogInForm from './components/LogInForm'
 import LogOutForm from './components/LogOutForm'
 import Togglable from './components/Toggable'
-import { notifyUser } from './utils/notifications'
+import { setNotificationTimeout } from './reducers/notificationReducer'
+import { useDispatch } from 'react-redux'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [notification, setNotification] = useState({
-    message: null,
-    success: true,
-  })
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
+  const dispatch = useDispatch()
 
   const isTokenExpired = (token) => {
     try {
@@ -51,25 +49,29 @@ const App = () => {
   const addBlog = (newBlog) => {
     blogFormRef.current.toggleVisibility()
     if (newBlog.author !== user.name) {
-      notifyUser(
-        setNotification,
-        'You can only add blogs with your own name',
-        false
+      dispatch(
+        setNotificationTimeout(
+          'You can only add blogs with your own name',
+          false,
+          5
+        )
       )
     } else {
       blogService
         .createBlog(newBlog)
         .then((returnedBlog) => {
           setBlogs(blogs.concat(returnedBlog))
-          notifyUser(
-            setNotification,
-            `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
-            true
+          dispatch(
+            setNotificationTimeout(
+              `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
+              true,
+              5
+            )
           )
         })
         .catch((error) => {
           const errorMessage = error.response.data.error
-          notifyUser(setNotification, errorMessage, false)
+          dispatch(setNotificationTimeout(errorMessage, false, 5))
         })
     }
   }
@@ -88,7 +90,7 @@ const App = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       blogService.deleteBlog(blog.id).then(() => {
         setBlogs(blogs.filter((b) => b.id !== blog.id))
-        notifyUser(setNotification, `blog ${title} removed`, true)
+        dispatch(setNotificationTimeout(`Blog ${title} removed`, true, 5))
       })
     }
   }
@@ -102,21 +104,15 @@ const App = () => {
   if (user === null) {
     return (
       <div>
-        <Notification
-          message={notification.message}
-          success={notification?.success}
-        />
-        <LogInForm setUser={setUser} setNotification={setNotification} />
+        <Notification />
+        <LogInForm setUser={setUser} />
       </div>
     )
   } else if (user) {
     return (
       <div>
         <h2>blogs</h2>
-        <Notification
-          message={notification.message}
-          success={notification?.success}
-        />
+        <Notification />
         <LogOutForm user={user} setUser={setUser} />
         {createBlog()}
         {blogs
