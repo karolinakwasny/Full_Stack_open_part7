@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import CreateBlog from './CreateBlog'
+import CreateBlog from './CreateBlogForm'
 import userEvent from '@testing-library/user-event'
 
 test('the form calls the event handler it received as props with the right details when a new blog is created', async () => {
@@ -24,5 +24,4 @@ test('the form calls the event handler it received as props with the right detai
   expect(addBlog.mock.calls[0][0].title).toBe('Test title')
   expect(addBlog.mock.calls[0][0].author).toBe('John Doe')
   expect(addBlog.mock.calls[0][0].url).toBe('https://url.com')
-
 })

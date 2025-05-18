@@ -2,8 +2,7 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog
-    .find({}).populate('user', { username: 1, name: 1 })
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
 
   response.json(blogs)
 })
@@ -18,9 +17,15 @@ blogsRouter.post('/', async (request, response) => {
     return response.status(401).json({ error: 'Invalid or missing token' })
   }
 
+  if (body.author !== user.name) {
+    return response
+      .status(403)
+      .json({ error: 'You can only add blogs with your own name' })
+  }
+
   const blog = new Blog({
     title: body.title,
-    author: body.author,
+    author: user.name,
     url: body.url,
     user: user.id,
     likes: body.likes !== undefined ? body.likes : 0,
@@ -35,7 +40,6 @@ blogsRouter.post('/', async (request, response) => {
 blogsRouter.delete('/:id', async (request, response) => {
   const user = request.user
 
-
   if (!user) {
     return response.status(401).json({ error: 'invalid or missing token' })
   }
@@ -44,8 +48,10 @@ blogsRouter.delete('/:id', async (request, response) => {
   if (!blog) {
     return response.status(404).send({ error: 'Blog not found' })
   }
-  if (blog.user.toString() !== user.id.toString()){
-    return response.status(403).send({ error: 'Only the creator can delete this blog' })
+  if (blog.user.toString() !== user.id.toString()) {
+    return response
+      .status(403)
+      .send({ error: 'Only the creator can delete this blog' })
   }
   await Blog.findByIdAndDelete(request.params.id)
 

@@ -1,9 +1,13 @@
-const LogOutForm = ({ user, setUser }) => {
+import { useDispatch, useSelector } from 'react-redux'
+import { userLogout } from '../reducers/userReducer'
+
+const LogOutForm = () => {
+  const user = useSelector((state) => state.user)
+  const dispatch = useDispatch()
 
   const handleLogout = async (event) => {
     event.preventDefault()
-    window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    dispatch(userLogout())
   }
 
   return (
