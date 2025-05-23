@@ -1,9 +1,12 @@
-const LogOutForm = ({ user, setUser }) => {
+import { useContext } from 'react'
+import UserContext from '../contexts/UserContext'
+
+const LogOutForm = () => {
+  const { user, clearUser } = useContext(UserContext)
 
   const handleLogout = async (event) => {
     event.preventDefault()
-    window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    clearUser()
   }
 
   return (

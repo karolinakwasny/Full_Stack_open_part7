@@ -1,32 +1,14 @@
-import React, { useState } from 'react'
-import loginService from '../services/login'
-import blogService from '../services/blogs'
-import { notifyUser } from '../utils/notifications'
+import { useContext, useState } from 'react'
+import UserContext from '../contexts/UserContext'
 
-const LogInForm = ({ setUser, setNotification }) => {
+const LogInForm = () => {
+  const { setUser } = useContext(UserContext)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    try {
-      const user = await loginService.login({
-        username, password,
-      })
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
-      blogService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      notifyUser(
-        setNotification,
-        'wrong username or password',
-        false
-      )
-    }
+    setUser({ username, password })
   }
 
   return (
@@ -34,7 +16,7 @@ const LogInForm = ({ setUser, setNotification }) => {
       <h2>log in to application</h2>
       <form onSubmit={handleLogin}>
         <div>
-      username
+          username
           <input
             type="text"
             data-testid="username"
@@ -44,7 +26,7 @@ const LogInForm = ({ setUser, setNotification }) => {
           />
         </div>
         <div>
-      password
+          password
           <input
             type="password"
             data-testid="password"
